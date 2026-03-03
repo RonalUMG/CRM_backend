@@ -1,0 +1,21 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<div style="max-width: 760px;">
+    <h1>Responder a {{ lead.name }}</h1>
+    <p><strong>Email:</strong> {{ lead.email }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div style="margin: 16px 0;">
+            <label for="mensaje"><strong>Mensaje</strong></label><br>
+            <textarea id="mensaje" name="mensaje" rows="8" style="width: 100%;" required></textarea>
+        </div>
+        <button type="submit" class="default">Enviar respuesta</button>
+    </form>
+
+    <p style="margin-top: 16px;">
+        <a href="{% url 'admin:clients_lead_change' lead.id %}">Volver al lead</a>
+    </p>
+</div>
+{% endblock %}
