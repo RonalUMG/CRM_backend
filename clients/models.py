@@ -1,5 +1,34 @@
 from django.db import models
 
+
+class Campus(models.Model):
+    name = models.CharField(max_length=150, unique=True)
+    city = models.CharField(max_length=100)
+    country = models.CharField(max_length=100, default="Guatemala")
+    is_central = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.name} ({self.city})"
+
+
+class Site(models.Model):
+    SITE_TYPE_CHOICES = [
+        ("main", "Sede principal"),
+        ("subsite", "Subsede"),
+    ]
+
+    campus = models.ForeignKey(Campus, on_delete=models.CASCADE, related_name="sites")
+    name = models.CharField(max_length=150)
+    city = models.CharField(max_length=100)
+    site_type = models.CharField(max_length=20, choices=SITE_TYPE_CHOICES, default="main")
+
+    class Meta:
+        unique_together = ("campus", "name")
+
+    def __str__(self):
+        return f"{self.name} - {self.campus.name}"
+
+
 class Client(models.Model):
 
     STATUS_CHOICES = [
@@ -44,6 +73,27 @@ class Lead(models.Model):
     email = models.EmailField()
     phone = models.CharField(max_length=50, blank=True)
     message = models.TextField()
+    preferred_campus = models.ForeignKey(
+        Campus,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="leads",
+    )
+    preferred_site = models.ForeignKey(
+        Site,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="leads",
+    )
+    high_school = models.ForeignKey(
+        "admissions.HighSchool",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="leads",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     converted = models.BooleanField(default=False)
 

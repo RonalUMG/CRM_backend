@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from admissions.models import HighSchool, SocialMessage
+from commercial.models import AcademicOffer
 from .models import Client, Lead, Note, Opportunity, Product
 
 
@@ -37,6 +39,24 @@ class ClientSerializer(serializers.ModelSerializer):
 class LeadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lead
+        fields = "__all__"
+
+
+class HighSchoolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HighSchool
+        fields = "__all__"
+
+
+class SocialMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SocialMessage
+        fields = "__all__"
+
+
+class AcademicOfferSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AcademicOffer
         fields = "__all__"
 
 

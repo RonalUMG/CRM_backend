@@ -1,17 +1,20 @@
 # CRM Backend
 
-Backend de practica para un CRM construido con Django y Django REST Framework.
+Backend de practica para un CRM universitario con Django + DRF.
 
 ## Stack
 - Python
 - Django
 - Django REST Framework
+- JWT (`djangorestframework-simplejwt`)
 - django-filter
 - SQLite (desarrollo)
 
-## Requisitos
-- Python 3.12+ (o version compatible con tu entorno)
-- Git
+## Modulos de negocio (admin)
+- `academics`: Campus y Sitios
+- `admissions`: Leads y Correos
+- `commercial`: Productos y Oportunidades
+- `crm`: Clientes, Notas y dashboard global
 
 ## Instalacion local
 1. Clonar repositorio:
@@ -24,7 +27,7 @@ cd CRM_backend
 ```bash
 python -m venv venv
 ```
-Windows PowerShell:
+PowerShell:
 ```powershell
 .\venv\Scripts\Activate.ps1
 ```
@@ -60,7 +63,12 @@ python manage.py runserver
 ## Rutas principales
 - Admin: `http://127.0.0.1:8000/admin/`
 - API base: `http://127.0.0.1:8000/api/`
-- Dashboard admin: `http://127.0.0.1:8000/admin/clients/client/dashboard/`
+
+Dashboards admin:
+- CRM: `http://127.0.0.1:8000/admin/crm/client/dashboard/`
+- Estructura: `http://127.0.0.1:8000/admin/academics/campus/dashboard/`
+- Admisiones: `http://127.0.0.1:8000/admin/admissions/lead/dashboard/`
+- Comercial: `http://127.0.0.1:8000/admin/commercial/product/dashboard/`
 
 ## Endpoints API
 - `GET/POST /api/clients/`
@@ -69,11 +77,16 @@ python manage.py runserver
 - `GET/POST /api/products/`
 - `GET/POST /api/opportunities/`
 
+JWT:
+- `POST /api/token/`
+- `POST /api/token/refresh/`
+
 ## Ejecutar pruebas
 ```bash
 python manage.py test clients
 ```
 
 ## Notas
-- El flujo de conversion de lead crea o reutiliza cliente por email.
-- Si el lead no tiene telefono, `convert` responde `400` con mensaje claro.
+- La API esta protegida con JWT (`IsAuthenticated`).
+- El flujo `convert` crea o reutiliza cliente por email.
+- Si un lead no tiene telefono, `convert` responde `400`.

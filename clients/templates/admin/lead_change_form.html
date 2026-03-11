@@ -2,9 +2,11 @@
 
 {% block object-tools %}
     {{ block.super }}
+    {% if original and original.pk %}
     <li>
         <a href="{% url 'admin:lead_responder' original.id %}" class="button">
             Responder Lead
         </a>
     </li>
+    {% endif %}
 {% endblock %}

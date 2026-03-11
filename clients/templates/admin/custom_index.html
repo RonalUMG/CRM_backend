@@ -1,0 +1,88 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<style>
+.admin-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.group-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+.group-card h2 {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+.group-card ul {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.group-card li {
+    margin: 6px 0;
+}
+
+.group-card a {
+    text-decoration: none;
+}
+</style>
+
+<h1 style="margin-bottom: 12px;">Panel Administrativo</h1>
+<p style="margin-bottom: 18px;">
+    Acceso rapido por categorias para el CRM Universitario.
+</p>
+
+<div class="admin-groups">
+    <section class="group-card">
+        <h2>Estructura Institucional</h2>
+        <ul>
+            <li><a href="{% url 'admin:academics_campus_changelist' %}">Campus</a></li>
+            <li><a href="{% url 'admin:academics_site_changelist' %}">Sitios / Sedes</a></li>
+            <li><a href="{% url 'admin:academics_faculty_changelist' %}">Facultades</a></li>
+            <li><a href="{% url 'admin:academics_academicperiod_changelist' %}">Periodos Academicos</a></li>
+            <li><a href="{% url 'admin:academics_academicdegree_changelist' %}">Grados Academicos</a></li>
+            <li><a href="{% url 'admin:academics_dashboard' %}">Dashboard</a></li>
+        </ul>
+    </section>
+
+    <section class="group-card">
+        <h2>Prospectos</h2>
+        <ul>
+            <li><a href="{% url 'admin:admissions_lead_changelist' %}">Posibles Clientes</a></li>
+            <li><a href="{% url 'admin:admissions_highschool_changelist' %}">Colegios</a></li>
+            <li><a href="{% url 'admin:admissions_socialmessage_changelist' %}">Social</a></li>
+            <li><a href="{% url 'admin:admissions_email_changelist' %}">Correos</a></li>
+            <li><a href="{% url 'admin:admissions_dashboard' %}">Dashboard</a></li>
+        </ul>
+    </section>
+
+    <section class="group-card">
+        <h2>Oferta Academica</h2>
+        <ul>
+            <li><a href="{% url 'admin:commercial_academicoffer_changelist' %}">Ofertas Academicas</a></li>
+            <li><a href="{% url 'admin:commercial_opportunity_changelist' %}">Oportunidades</a></li>
+            <li><a href="{% url 'admin:commercial_product_changelist' %}">Programas</a></li>
+            <li><a href="{% url 'admin:commercial_dashboard' %}">Dashboard</a></li>
+        </ul>
+    </section>
+
+    <section class="group-card">
+        <h2>CRM</h2>
+        <ul>
+            <li><a href="{% url 'admin:crm_client_changelist' %}">Clientes</a></li>
+            <li><a href="{% url 'admin:crm_note_changelist' %}">Notas</a></li>
+            <li><a href="{% url 'admin:crm_dashboard' %}">Dashboard</a></li>
+        </ul>
+    </section>
+</div>
+
+{{ block.super }}
+{% endblock %}
