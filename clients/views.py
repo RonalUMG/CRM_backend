@@ -1,5 +1,7 @@
 import logging
 
+from admissions.models import HighSchool, SocialMessage
+from commercial.models import AcademicOffer
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
@@ -7,14 +9,18 @@ from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Client, Email, Lead, Opportunity, Product
 from .serializers import (
     ClientSerializer,
+    AcademicOfferSerializer,
+    HighSchoolSerializer,
     LeadSerializer,
     OpportunitySerializer,
     ProductSerializer,
+    SocialMessageSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,16 +29,19 @@ logger = logging.getLogger(__name__)
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class OpportunityViewSet(viewsets.ModelViewSet):
     queryset = Opportunity.objects.all()
     serializer_class = OpportunitySerializer
+    permission_classes = [IsAuthenticated]
 
 
 class ClientViewSet(viewsets.ModelViewSet):
-    queryset = Client.objects.prefetch_related("notes").all()
+    queryset = Client.objects.prefetch_related("notes").order_by("-created_at")
     serializer_class = ClientSerializer
+    permission_classes = [IsAuthenticated]
 
     filter_backends = [filters.SearchFilter, filters.OrderingFilter, DjangoFilterBackend]
     search_fields = ["name", "email", "company"]
@@ -43,6 +52,7 @@ class ClientViewSet(viewsets.ModelViewSet):
 class LeadViewSet(viewsets.ModelViewSet):
     queryset = Lead.objects.all()
     serializer_class = LeadSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         lead = serializer.save()
@@ -70,7 +80,7 @@ Nombre: {lead.name}
 Email: {lead.email}
 Mensaje: {lead.message}
 """,
-                direction="out",
+                direction="outbound",
             )
         except Exception:
             logger.exception("Error enviando correo para lead_id=%s", lead.id)
@@ -131,3 +141,28 @@ Pronto nos pondremos en contacto contigo.
             {"message": "Lead convertido correctamente."},
             status=status.HTTP_200_OK,
         )
+
+
+class HighSchoolViewSet(viewsets.ModelViewSet):
+    queryset = HighSchool.objects.all()
+    serializer_class = HighSchoolSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class SocialMessageViewSet(viewsets.ModelViewSet):
+    queryset = SocialMessage.objects.select_related("lead").all()
+    serializer_class = SocialMessageSerializer
+    permission_classes = [IsAuthenticated]
+
+
+class AcademicOfferViewSet(viewsets.ModelViewSet):
+    queryset = AcademicOffer.objects.select_related(
+        "program",
+        "campus",
+        "site",
+        "faculty",
+        "academic_degree",
+        "academic_period",
+    ).order_by("-id")
+    serializer_class = AcademicOfferSerializer
+    permission_classes = [IsAuthenticated]
