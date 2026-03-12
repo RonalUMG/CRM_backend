@@ -60,7 +60,7 @@ class LeadAdmin(admin.ModelAdmin):
             total_leads=LeadBase.objects.count(),
             total_leads_convertidos=LeadBase.objects.filter(converted=True).count(),
             total_leads_pendientes=LeadBase.objects.filter(converted=False).count(),
-            total_correos_enviados=EmailBase.objects.filter(direction="out").count(),
+            total_correos_enviados=EmailBase.objects.filter(direction="outbound").count(),
             total_social_messages=SocialMessage.objects.count(),
             recent_leads=LeadBase.objects.select_related("preferred_campus", "preferred_site", "high_school").order_by("-created_at")[:8],
             recent_emails=EmailBase.objects.select_related("lead").order_by("-sent_at")[:8],
@@ -86,7 +86,7 @@ class LeadAdmin(admin.ModelAdmin):
                 lead=lead,
                 subject="Respuesta a tu consulta",
                 body=mensaje,
-                direction="out",
+                direction="outbound",
             )
 
             messages.success(request, "Correo enviado al lead correctamente")

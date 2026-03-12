@@ -1,0 +1,12 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}UPANA CRM{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">UPANA CRM</a></h1>
+{% endblock %}
+
+{% block extrahead %}
+<link rel="icon" href="{% static 'public/favicon.svg' %}" type="image/svg+xml">
+{% endblock %}

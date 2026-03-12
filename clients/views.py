@@ -80,7 +80,7 @@ Nombre: {lead.name}
 Email: {lead.email}
 Mensaje: {lead.message}
 """,
-                direction="out",
+                direction="outbound",
             )
         except Exception:
             logger.exception("Error enviando correo para lead_id=%s", lead.id)

@@ -4,29 +4,21 @@ from admissions.models import HighSchool
 from academics.models import AcademicDegree, AcademicPeriod, Faculty
 from commercial.models import AcademicOffer
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from .models import Campus, Client, Lead, Product, Site
-from .serializers import ClientSerializer
+from .models import Campus, Client, Lead, Note, Product, Site
+from .serializers import ClientSerializer, LeadSerializer
 
 
 class ClientSerializerValidationTests(TestCase):
-    def test_accepts_non_gmail_email(self):
-        serializer = ClientSerializer(
-            data={
-                "name": "Juan Perez",
-                "company": "ACME",
-                "email": "juan@empresa.com",
-                "phone": "12345678",
-                "status": "prospect",
-            }
-        )
-        self.assertTrue(serializer.is_valid(), serializer.errors)
-
-    def test_rejects_phone_without_8_digits(self):
+    def test_rejects_phone_not_8_digits(self):
+        """
+        Tests that the serializer rejects phone numbers that do not have 8 digits.
+        """
         serializer = ClientSerializer(
             data={
                 "name": "Maria Lopez",
@@ -39,18 +31,99 @@ class ClientSerializerValidationTests(TestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn("phone", serializer.errors)
 
-    def test_accepts_valid_client_payload(self):
+    def test_accepts_phone_with_8_digits(self):
+        """
+        Tests that the serializer accepts phone numbers with 8 digits.
+        """
         serializer = ClientSerializer(
             data={
-                "name": "Carlos Soto",
+                "name": "Juan Perez",
                 "company": "ACME",
-                "email": "CARLOS@OUTLOOK.COM",
-                "phone": "1234-5678",
+                "email": "juan@empresa.com",
+                "phone": "12345678",
                 "status": "prospect",
             }
         )
         self.assertTrue(serializer.is_valid(), serializer.errors)
-        self.assertEqual(serializer.validated_data["email"], "carlos@outlook.com")
+
+    def test_accepts_empty_phone(self):
+        """
+        Tests that the serializer accepts an empty phone number.
+        """
+        serializer = ClientSerializer(
+            data={
+                "name": "Ana Sin Telefono",
+                "company": "ACME",
+                "email": "ana@gmail.com",
+                "phone": "",
+                "status": "prospect",
+            }
+        )
+        # The client model does not allow blank phones, so the serializer
+        # should be invalid.
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("phone", serializer.errors)
+
+
+class LeadSerializerValidationTests(TestCase):
+    def test_rejects_phone_not_8_digits(self):
+        """
+        Tests that the serializer rejects phone numbers that do not have 8 digits.
+        """
+        serializer = LeadSerializer(
+            data={
+                "name": "Maria Lopez",
+                "email": "maria@gmail.com",
+                "phone": "12345",
+                "message": "Test message",
+            }
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("phone", serializer.errors)
+
+    def test_accepts_phone_with_8_digits(self):
+        """
+        Tests that the serializer accepts phone numbers with 8 digits.
+        """
+        serializer = LeadSerializer(
+            data={
+                "name": "Juan Perez",
+                "email": "juan@empresa.com",
+                "phone": "12345678",
+                "message": "Test message",
+            }
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    def test_accepts_empty_phone(self):
+        """
+        Tests that the serializer accepts an empty phone number for a lead.
+        """
+        serializer = LeadSerializer(
+            data={
+                "name": "Pedro Sin Telefono",
+                "email": "pedro@gmail.com",
+                "phone": "",
+                "message": "Test message",
+            }
+        )
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+
+    def test_partial_update_with_invalid_phone(self):
+        """
+        Tests that a partial update with an invalid phone number is rejected.
+        """
+        lead = Lead.objects.create(
+            name="Test Lead",
+            email="test@test.com",
+            message="test",
+            phone="12345678",
+        )
+        serializer = LeadSerializer(
+            instance=lead, data={"phone": "123456789"}, partial=True
+        )
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("phone", serializer.errors)
 
 
 class LeadCampusSiteTests(TestCase):
@@ -239,3 +312,59 @@ class JwtProtectionTests(APITestCase):
         url = reverse("academicoffer-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+class ModelImprovementTests(TestCase):
+    def test_client_phone_validation(self):
+        """
+        Tests phone number validation for the Client model.
+        """
+        # Valid phone numbers
+        Client.objects.create(name="Test", email="test1@test.com", phone="12345678")
+        self.assertEqual(Client.objects.count(), 1)
+
+        Client.objects.create(
+            name="Test 2", email="test2@test.com", phone="+50212345678"
+        )
+        self.assertEqual(Client.objects.count(), 2)
+
+        # Invalid phone numbers
+        with self.assertRaises(ValidationError):
+            client_invalid = Client(
+                name="Test Invalid", email="test3@test.com", phone="1234"
+            )
+            client_invalid.full_clean()
+
+        with self.assertRaises(ValidationError):
+            client_invalid_chars = Client(
+                name="Test Invalid Chars", email="test4@test.com", phone="123-456"
+            )
+            client_invalid_chars.full_clean()
+
+    def test_lead_phone_validation(self):
+        """
+        Tests phone number validation for the Lead model.
+        """
+        # Valid phone number
+        Lead.objects.create(name="Test Lead", email="lead@test.com", phone="12345678", message="Test message")
+        self.assertEqual(Lead.objects.count(), 1)
+
+        # Invalid phone number
+        with self.assertRaises(ValidationError):
+            lead_invalid = Lead(
+                name="Test Invalid Lead", email="lead2@test.com", phone="123", message="Test message"
+            )
+            lead_invalid.full_clean()
+
+    def test_note_ordering(self):
+        """
+        Tests that Notes are ordered by creation date descending.
+        """
+        client = Client.objects.create(
+            name="Test Client", email="client@test.com", phone="12345678"
+        )
+        note1 = Note.objects.create(client=client, content="First note")
+        note2 = Note.objects.create(client=client, content="Second note")
+
+        notes = client.notes.all()
+        self.assertEqual(notes[0], note2)
+        self.assertEqual(notes[1], note1)

@@ -1,0 +1,111 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Universidad - Prospectos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="{% static 'public/favicon.svg' %}" type="image/svg+xml">
+    <link rel="stylesheet" href="{% static 'public/site.css' %}">
+</head>
+<body>
+<main class="page">
+    <header class="hero">
+        <div class="hero__text">
+            <p class="eyebrow">Universidad</p>
+            <h1>Tu futuro inicia aqui</h1>
+            <p class="lead">
+                Solicita informacion de nuestros programas y recibe asesoria en admisiones.
+            </p>
+            <div class="hero__stats">
+                <div class="stat">
+                    <div class="stat__value">{{ total_programs }}</div>
+                    <div class="stat__label">Programas</div>
+                </div>
+                <div class="stat">
+                    <div class="stat__value">{{ total_campus }}</div>
+                    <div class="stat__label">Campus</div>
+                </div>
+                <div class="stat">
+                    <div class="stat__value">{{ total_offers }}</div>
+                    <div class="stat__label">Ofertas activas</div>
+                </div>
+            </div>
+        </div>
+        <div class="hero__form">
+            <h2>Quiero informacion</h2>
+            {% if errors %}
+            <div class="alert">
+                Revisa los campos marcados y vuelve a intentar.
+            </div>
+            {% endif %}
+            <form method="post" action="{% url 'public_apply' %}">
+                {% csrf_token %}
+                <label>
+                    Nombre completo
+                    <input name="name" required value="{{ form.name|default:'' }}">
+                </label>
+                <label>
+                    Email
+                    <input type="email" name="email" required value="{{ form.email|default:'' }}">
+                </label>
+                <label>
+                    Telefono (8 digitos)
+                    <input name="phone" maxlength="8" value="{{ form.phone|default:'' }}">
+                </label>
+                <label>
+                    Campus preferido
+                    <select name="preferred_campus">
+                        <option value="">Selecciona un campus</option>
+                        {% for campus in campuses %}
+                        <option value="{{ campus.id }}">{{ campus.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Sede preferida
+                    <select name="preferred_site">
+                        <option value="">Selecciona una sede</option>
+                        {% for site in sites %}
+                        <option value="{{ site.id }}">{{ site.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Colegio de diversificado
+                    <select name="high_school">
+                        <option value="">Selecciona tu colegio</option>
+                        {% for hs in high_schools %}
+                        <option value="{{ hs.id }}">{{ hs.name }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Mensaje
+                    <textarea name="message" rows="4">{{ form.message|default:'' }}</textarea>
+                </label>
+                <button type="submit">Enviar solicitud</button>
+            </form>
+        </div>
+    </header>
+
+    <section class="section">
+        <h2>Programas destacados</h2>
+        <div class="grid">
+            {% for program in programs %}
+            <article class="card">
+                <h3>{{ program.name }}</h3>
+                {% if program.description %}
+                <p>{{ program.description|truncatechars:120 }}</p>
+                {% else %}
+                <p>Descripcion del programa disponible en admisiones.</p>
+                {% endif %}
+            </article>
+            {% empty %}
+            <p>No hay programas activos.</p>
+            {% endfor %}
+        </div>
+    </section>
+</main>
+</body>
+</html>

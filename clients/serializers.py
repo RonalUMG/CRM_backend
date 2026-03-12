@@ -16,7 +16,16 @@ class ClientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Client
-        fields = ["id", "name", "company", "email", "phone", "status", "created_at", "notes"]
+        fields = [
+            "id",
+            "name",
+            "company",
+            "email",
+            "phone",
+            "status",
+            "created_at",
+            "notes",
+        ]
         read_only_fields = ["created_at", "notes"]
 
     def validate_email(self, value):
@@ -24,22 +33,26 @@ class ClientSerializer(serializers.ModelSerializer):
 
     def validate_phone(self, value):
         digits = "".join(filter(str.isdigit, value))
+
         if len(digits) != 8:
-            raise serializers.ValidationError("El telefono debe tener 8 digitos")
-        return value
+            raise serializers.ValidationError(
+                "El telefono debe tener exactamente 8 digitos"
+            )
 
-    def validate(self, data):
-        status_value = data.get("status")
-        phone_value = data.get("phone")
-        if status_value == "inactive" and phone_value:
-            raise serializers.ValidationError("Un cliente inactivo no debe tener telefono registrado.")
-        return data
-
+        return digits
 
 class LeadSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lead
         fields = "__all__"
+
+    def validate_phone(self, value):
+        if not value:
+            return value
+        digits = "".join(filter(str.isdigit, value))
+        if len(digits) != 8:
+            raise serializers.ValidationError("El telefono debe tener 8 digitos")
+        return value
 
 
 class HighSchoolSerializer(serializers.ModelSerializer):
