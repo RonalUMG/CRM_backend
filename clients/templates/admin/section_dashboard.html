@@ -1,0 +1,90 @@
+{% extends "admin/base_site.html" %}
+
+{% block content %}
+<style>
+.metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.metric-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    background: #fff;
+}
+
+.metric-card h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #4b5563;
+}
+
+.metric-card p {
+    margin: 8px 0 0;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.table-wrapper {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fff;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    padding: 8px 10px;
+}
+
+th {
+    background: #f8fafc;
+}
+</style>
+
+<h1>{{ section_title }}</h1>
+
+<div class="metrics">
+    {% for label, value in metrics %}
+    <div class="metric-card">
+        <h3>{{ label }}</h3>
+        <p>{{ value }}</p>
+    </div>
+    {% endfor %}
+</div>
+
+<h2>{{ recent_title }}</h2>
+<div class="table-wrapper">
+    <table>
+        <thead>
+            <tr>
+                {% for header in recent_headers %}
+                <th>{{ header }}</th>
+                {% endfor %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in recent_rows %}
+            <tr>
+                {% for col in row %}
+                <td>{{ col }}</td>
+                {% endfor %}
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="{{ recent_headers|length }}">No hay registros recientes.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
